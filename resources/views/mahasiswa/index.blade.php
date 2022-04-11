@@ -7,12 +7,7 @@
                 <h2>JURUSAN TEKNOLOGI INFORMASI-POLITEKNIK NEGERI MALANG</h2>
             </div>
             <div class="float-right my-2">
-            <a class="btn btn-success" href="{{ route('mahasiswa.create') }}"> Input Mahasiswa</a></br></br>
-            <div class="float-right my-2">
-                <form method="GET" action=" {{url('mahasiswa')}}">
-                    <input type="text" name="keyword" value="{{ $keyword}} "/>
-                    <button type="submit">Search</button>
-                </form></br>
+            <a class="btn btn-success" href="{{ route('mahasiswa.create') }}"> Input Mahasiswa</a>
         </div>
     </div>
 </div>
@@ -39,13 +34,13 @@
         <th>Tanggal Lahir</th>
         <th width="280px">Action</th>
     </tr>
- @foreach ($mahasiswa as $mhs) 
+ @foreach ($paginate as $mhs) 
     <tr>
  
     <td>{{ $mhs ->email }}</td>
     <td>{{ $mhs ->nim }}</td>
     <td>{{ $mhs ->nama }}</td>
-    <td>{{ $mhs ->kelas }}</td>
+    <td>{{ $mhs ->kelas->nama_kelas }}</td>
     <td>{{ $mhs ->jurusan }}</td>
     <td>{{ $mhs ->alamat }}</td>
     <td>{{ $mhs ->tanggal_lahir }}</td>
@@ -63,5 +58,4 @@
         </tr>
     @endforeach 
     </table>
-    {{$mahasiswa->links()}}
 @endsection
