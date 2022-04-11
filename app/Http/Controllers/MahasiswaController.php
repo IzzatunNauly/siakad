@@ -6,6 +6,7 @@ use App\Models\Mahasiswa;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\DB;
 use App\Models\Kelas; 
+use App\Models\Mahasiswa_MataKuliah;
 
 class MahasiswaController extends Controller
 {
@@ -72,11 +73,15 @@ class MahasiswaController extends Controller
 
         $kelas = new Kelas;
         $kelas->id = $request->get('Kelas');
-
+    
+        //fungsi eloquent untuk menambah data
         $mahasiswa->kelas()->associate($kelas);
         $mahasiswa->save();
-        return redirect()->route('mahasiswa.index') 
-        ->with('success', 'Mahasiswa Berhasil Ditambahkan'); 
+        // Mahasiswa::create($request->all());
+        
+        //jika data berhasil ditambahkan, akan kembali ke halaman utama
+        return redirect()->route('mahasiswa.index')
+        ->with('success', 'Mahasiswa Berhasil Ditambahkan');
     }
 
     /**
@@ -169,5 +174,16 @@ class MahasiswaController extends Controller
         Mahasiswa::where('nim', $nim)->delete();
         return redirect()->route('mahasiswa.index') 
             -> with('success', 'Mahasiswa Berhasil Dihapus');
+    }
+    public function khs($nim){
+        $mhs = Mahasiswa::where('nim', $nim)->first();
+        $nilai = Mahasiswa_MataKuliah::where('mahasiswa_id', $mhs->id_mahasiswa)
+                                       ->with('matakuliah')
+                                       ->with('mahasiswa')
+                                       ->get();
+        $nilai->mahasiswa = Mahasiswa::with('kelas')->where('nim', $nim)->first();
+        //dd($nilai);
+        
+        return view('mahasiswa.khs', compact('nilai'));
     }
 };

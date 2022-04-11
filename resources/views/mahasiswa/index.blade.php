@@ -53,9 +53,11 @@
         @method('DELETE') 
 
         <button type="submit" class="btn btn-danger">Delete</button>
+        <a class="btn btn-warning btn-sm" href="/mahasiswa/nilai/{{ $mhs->nim }}">Nilai</a>
         </form>
         </td>
         </tr>
     @endforeach 
     </table>
+    {{ $paginate->links() }}
 @endsection

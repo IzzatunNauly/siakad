@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MahasiswaController;
 use Illuminate\Http\Request; 
+use App\Models\Mahasiswa_MataKuliah;
 
 
 /*
@@ -21,3 +22,4 @@ Route::get('/', function () {
 });
 
 Route::resource('mahasiswa', MahasiswaController::class);
+Route::get('mahasiswa/nilai/{nim}', [MahasiswaController::class, 'khs']);
