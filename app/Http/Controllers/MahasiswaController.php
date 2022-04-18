@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Kelas; 
 use App\Models\Mahasiswa_MataKuliah;
+use PDF;
 
 class MahasiswaController extends Controller
 {
@@ -53,27 +54,36 @@ class MahasiswaController extends Controller
     public function store(Request $request)
     {
         //melakukan validasi data
-        $request->validate([ 
+        $request->validate([
             'Email' => 'required',
-            'Nim' => 'required', 
-            'Nama' => 'required', 
-            'Kelas' => 'required', 
-            'Jurusan' => 'required', 
+            'Nim' => 'required',
+            'Nama' => 'required',
+            'Kelas' => 'required',
+            'Jurusan' => 'required',
             'Alamat' => 'required',
             'Tanggal_Lahir' => 'required',
-    ]); 
-        $mahasiswa = new Mahasiswa;
-        $mahasiswa->email = $request->get('Email');
-        $mahasiswa->nim = $request->get('Nim');
-        $mahasiswa->nama = $request->get('Nama');
-        $mahasiswa->jurusan = $request->get('Jurusan');
-        $mahasiswa->alamat = $request->get('Alamat');
-        $mahasiswa->tanggal_lahir = $request->get('Tanggal_Lahir');
-        $mahasiswa->save();
+            'userfile' => 'required'
+        ]);
+
+        if($request->file('userfile')){
+            $image_name = $request->file('userfile')->store('image', 'public');
+        }
+        
+            $mahasiswa = new Mahasiswa;
+            $mahasiswa->nim = $request->get('Email');
+            $mahasiswa->nim = $request->get('Nim');
+            $mahasiswa->nama = $request->get('Nama'); 
+            $mahasiswa->jurusan = $request->get('Jurusan');
+            $mahasiswa->nim = $request->get('Alamat');
+            $mahasiswa->nim = $request->get('Tanggal_Lahir');
+            $mahasiswa->foto = $image_name;
+            $mahasiswa->alamat = '';
+            $mahasiswa->tanggal_lahir = '';
+            $mahasiswa->save();
 
         $kelas = new Kelas;
         $kelas->id = $request->get('Kelas');
-    
+
         //fungsi eloquent untuk menambah data
         $mahasiswa->kelas()->associate($kelas);
         $mahasiswa->save();
@@ -118,48 +128,51 @@ class MahasiswaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $Nim)
+    public function update(Request $request, $nim)
     {
+        
+        //ddd($request);
         //melakukan validasi data
-        $request->validate([ 
-            'Email' => 'required',
-            'Nim' => 'required', 
-            'Nama' => 'required', 
-            'Kelas' => 'required', 
-            'Jurusan' => 'required', 
-            'Alamat' => 'required',
-            'Tanggal_Lahir' => 'required',
-            ]); 
+        $request->validate([
+        'Email' => 'required',
+        'Nim' => 'required',
+        'Nama' => 'required',
+        'Kelas' => 'required',
+        'Jurusan' => 'required',
+        'Alamat' => 'required',
+        'Tanggal_Lahir' => 'required',
+        'userfile' => 'required'
+        ]);
+        $mahasiswa = Mahasiswa::with('kelas')->where('nim', $nim)->first();
+        $mahasiswa->email = $request->get('Email');
+        $mahasiswa->nim = $request->get('Nim');
+        $mahasiswa->nama = $request->get('Nama');
+        $mahasiswa->jurusan = $request->get('Jurusan');
+        $mahasiswa->alamat = $request->get('Alamat');
+        $mahasiswa->tanggal_lahir = $request->get('Tanggal_Lahir');
         
-            $mahasiswa = Mahasiswa::with('kelas')->where('nim', $Nim)->first(); 
-            $mahasiswa->email = $request->get('Email');
-            $mahasiswa->nim = $request->get('Nim');
-            $mahasiswa->nama = $request->get('Nama');
-            $mahasiswa->jurusan = $request->get('Jurusan');
-            $mahasiswa->alamat = $request->get('Alamat');
-            $mahasiswa->tanggal_lahir = $request->get('Tanggal_Lahir');
-            $mahasiswa->save();
-    
-            $kelas = new Kelas;
-            $kelas->id = $request->get('Kelas');
-    
-            $mahasiswa->kelas()->associate($kelas);
-            $mahasiswa->save();
-        //fungsi eloquent untuk mengupdate data inputan kita
-            // Mahasiswa::where('nim', $nim) 
-            // ->update([ 
-            // 'email'=>$request->Email,
-            // 'nim'=>$request->Nim, 
-            // 'nama'=>$request->Nama, 
-            // 'kelas'=>$request->Kelas, 
-            // 'jurusan'=>$request->Jurusan, 
-            // 'alamat'=>$request->Alamat,
-            // 'tanggal_lahir'=>$request->Tanggal_Lahir,
-            // ]); 
-        //jika data berhasil diupdate, akan kembali ke halaman utama
-            return redirect()->route('mahasiswa.index') 
-            ->with('success', 'Mahasiswa Berhasil Diupdate'); 
+        if($mahasiswa->foto && file_exists(storage_path('./app/public/'. $mahasiswa->foto))){
+            Storage::delete(['./public/', $mahasiswa->foto]);
+        }
         
+        $image_name = $request->file('userfile')->store('image', 'public');
+        $mahasiswa->foto = $image_name;
+
+        $mahasiswa->alamat = '';
+        $mahasiswa->tanggal_lahir = '';
+        $mahasiswa->save();
+
+        $kelas = new Kelas;
+        $kelas->id = $request->get('Kelas');
+
+        //fungsi eloquent untuk menambah data
+        $mahasiswa->kelas()->associate($kelas);
+        $mahasiswa->save();
+        // Mahasiswa::create($request->all());
+        
+        //jika data berhasil ditambahkan, akan kembali ke halaman utama
+        return redirect()->route('mahasiswa.index')
+        ->with('success', 'Mahasiswa Berhasil Diupdate');
     }
 
     /**
@@ -185,5 +198,16 @@ class MahasiswaController extends Controller
         //dd($nilai);
         
         return view('mahasiswa.khs', compact('nilai'));
+    }
+    public function cetak_pdf($nim){
+        // dd('tetsing');
+        $mhs = Mahasiswa::where('nim', $nim)->first();
+        $nilai = Mahasiswa_MataKuliah::where('mahasiswa_id', $mhs->id_mahasiswa)
+                                       ->with('matakuliah')
+                                       ->with('mahasiswa')
+                                       ->get();
+        $nilai->mahasiswa = Mahasiswa::with('kelas')->where('nim', $nim)->first();
+        $pdf = PDF::loadview('mahasiswa.nilai_pdf', compact('nilai'));
+        return $pdf->stream();
     }
 };

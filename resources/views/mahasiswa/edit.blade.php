@@ -54,6 +54,9 @@
  <label for="Tanggal_Lahir">Tanggal_Lahir</label> 
  <input type="Tanggal_Lahir" name="Tanggal_Lahir" class="form-control" id="Tanggal_Lahir" value="{{ $mahasiswa->tanggal_lahir }}" aria-describedby="Tanggal_Lahir" > 
  </div>
+  <label for="image">Foto</label> 
+ <input type="file" class="form-control" required="required" name="image"></br> 
+ <div class="form-group">
  <button type="submit" class="btn btn-primary">Submit</button>
  </form>
  </div>

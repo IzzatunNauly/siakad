@@ -14,7 +14,12 @@
 <div class="container">
   <p><b>Nama : </b> {{ $nilai->mahasiswa->nama }}</p>
   <p><b>NIM : </b> {{ $nilai->mahasiswa->nim }}</p>
-  <p><b>Kelas : </b> {{ $nilai->mahasiswa->kelas->nama_kelas }}</p>
+  <p><b>Kelas : </b> {{ $nilai->mahasiswa->kelas->nama_kelas }}</p><br>
+  <div class="row">
+     <div style="margin:0px 0px 0px 70px;">
+        <a class="btn btn-success" href="{{ route('cetak_pdf') }}"> Cetak PDF</a>
+    </div>
+ </div><br><br>
   <table class="table table-bordered">
     <tr>
       <th>Matakuliah</th>
